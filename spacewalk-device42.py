@@ -20,6 +20,8 @@ SATELLITE_URL = config.get('SPACEWALK', 'apiurl')
 SATELLITE_CREDS = dict()
 for key, val in config.items('SPACEWALK_ORGS'):
     SATELLITE_CREDS[int(key)] = val.split(',')
+succeeded = []
+failed = []
 
 #
 # login (admin)
@@ -32,7 +34,7 @@ key = client.auth.login(SATELLITE_CREDS[1][0], SATELLITE_CREDS[1][1])
 #
 orgs = client.org.listOrgs(key)
 for org in orgs:
-    print "=" * 80
+    print '=' * 80
     print "Spacewalk Organization: {} ({})".format(org['name'], org['id'])
 
     #
@@ -47,7 +49,7 @@ for org in orgs:
     #
     systems = client2.system.listUserSystems(key2, SATELLITE_CREDS[org['id']][0])
     for system in systems:
-        print "-" * 70
+        print '-' * 80
         print "  System Name: {} ({})".format(system['name'], system['id'])
 
         channel = client2.system.getSubscribedBaseChannel(key2, system['id'])
@@ -71,6 +73,12 @@ for org in orgs:
         r = requests.put(url, auth=DEVICE42_CREDS, data=payload)
         print "      Setting D42 Spacewalk Organization, Base Channel, Activation Key: HTTP {}".format(r.status_code)
 
+        # failed?
+        if r.status_code != 200:
+            failed.append(system['name'])
+        else:
+            succeeded.append(system['name'])
+
         #
         # d42: update spacewalk registration date (can't do it above b/c it's type 'date' not 'text')
         #
@@ -93,3 +101,12 @@ for org in orgs:
 # logout (admin)
 #
 client.auth.logout(key)
+
+#
+# summary information; display failed hosts (if there are any)
+#
+print '=' * 80
+print "Processed {} hosts ({} succeeded and {} failed)".format(len(succeeded)+len(failed), len(succeeded), len(failed))
+if len(failed):
+    print "Failed:"
+    print '\n'.join(failed)
