@@ -1,0 +1,14 @@
+[DEVICE42]
+apiurl = https://device42.yoursite.edu/api/1.0/device/custom_field/
+username = apiuser
+password = apipass
+
+[SPACEWALK]
+apiurl = https://spacewalk.yoursite.edu/rpc/api
+
+[SPACEWALK_ORGS]
+1 = admin,XXXXXXXX
+2 = orgadmin1,XXXXXXXX
+3 = orgadmin2,XXXXXXXX
+# keep adding if you need to, etc...
+# the format is: org id = org user,org pass
